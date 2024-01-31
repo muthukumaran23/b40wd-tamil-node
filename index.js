@@ -9,7 +9,7 @@ console.log(process.env.MONGO_URL);
 
 const app = express();
 
-const PORT = 4000;
+const PORT = process.env.PORT; // Auto assign PORT
 
 // Connection
 const MONGO_URL = process.env.MONGO_URL;
