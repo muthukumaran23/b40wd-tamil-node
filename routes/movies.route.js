@@ -1,5 +1,11 @@
 import express from "express";
-import { client } from "../index.js";
+import {
+  getMovies,
+  getMovieById,
+  createMovies,
+  deleteMovieById,
+  updateMovieById,
+} from "../services/movies.service.js";
 
 const router = express.Router();
 
@@ -12,11 +18,7 @@ router.get("/", async function (request, response) {
   // db.movies.find({})
 
   // Cursor - Pagination | Cursor -> Array | toArray()
-  const movies = await client
-    .db("person")
-    .collection("details")
-    .find(request.query)
-    .toArray();
+  const movies = await getMovies(request);
   //console.log(movies);
 
   response.send(movies);
@@ -29,10 +31,7 @@ router.get("/:id", async function (request, response) {
   // db.movies.findOne({ id: '100' })
 
   //const movie = movies.find((mv) => mv.id == id);
-  const movie = await client
-    .db("person")
-    .collection("details")
-    .findOne({ id: id });
+  const movie = await getMovieById(id);
 
   console.log("movie", movie);
   movie
@@ -45,10 +44,7 @@ router.post("/", async function (request, response) {
   console.log(data);
   // db.movies.insertMany(data)
 
-  const result = await client
-    .db("person")
-    .collection("details")
-    .insertMany(data);
+  const result = await createMovies(data);
 
   response.send(result);
 });
@@ -59,10 +55,7 @@ router.delete("/:id", async function (request, response) {
   // db.movies.deletOne({ id: '100' })
 
   //const movie = movies.find((mv) => mv.id == id);
-  const result = await client
-    .db("person")
-    .collection("details")
-    .deleteOne({ id: id });
+  const result = await deleteMovieById(id);
 
   console.log("movie", result);
   result.deletedCount > 0
@@ -77,10 +70,7 @@ router.put("/:id", async function (request, response) {
 
   console.log(id);
 
-  const result = await client
-    .db("person")
-    .collection("details")
-    .updateOne({ id: id }, { $set: data });
+  const result = await updateMovieById(id, data);
 
   console.log(result);
 
