@@ -7,7 +7,6 @@ import moviesRouter from "./routes/movies.route.js";
 dotenv.config();
 
 // env - environment variables
-console.log(process.env.MONGO_URL);
 
 const app = express();
 
