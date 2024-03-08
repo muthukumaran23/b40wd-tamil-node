@@ -7,6 +7,7 @@ import userRouter from "./routes/user.route.js";
 import cors from "cors";
 import { auth } from "./middleware/auth.js";
 import { ObjectId } from "mongodb";
+import nodemailer from "nodemailer";
 
 dotenv.config();
 
@@ -94,3 +95,30 @@ app.delete("/mobiles/:id", auth, async function (request, response) {
 app.listen(PORT, () => console.log(`The server started in: ${PORT} ✨✨`)); // App start
 
 export { client };
+
+// async..await is not allowed in global scope, must use a wrapper
+async function main() {
+  let transporter = nodemailer.createTransport({
+    service: "gmail",
+    host: "smtp.gmail.com",
+    secure: false, // Use `true` for port 465, `false` for all other ports
+    auth: {
+      user: process.env.NORMAL_MATLER_USER,
+      pass: process.env.NORMAL_MAILER_PASSWORD,
+    },
+  });
+
+  // send mail with defined transport object
+  let info = await transporter.sendMail({
+    from: '"zoyaz 👻" <zoyaz1832@gmail.com>', // sender address
+    to: "tvm.muthukumaran007@gmail.com, pulsarpavuns786@gmail.com", // list of receivers
+    subject: "Hello ✔", // Subject line
+    text: "Hello world?", // plain text body
+    html: "<b>Hello world?</b>", // html body
+  });
+
+  console.log("Message sent: %s", info.messageId);
+  // Message sent: <d786aa62-4e0a-070a-47ed-0b0666549519@ethereal.email>
+}
+
+main().catch(console.error);
