@@ -27,6 +27,7 @@ router.post("/signup", async function (request, response) {
     const result = await createUser({
       username: username,
       password: hashedPasswird,
+      roleId: 1,
     });
 
     response.send(result);
@@ -37,19 +38,23 @@ router.post("/login", async function (request, response) {
   const { username, password } = request.body;
   // db.user.insertOne(data)
 
-  const useFromDB = await getUserByName(username);
-  console.log(useFromDB);
+  const userFromDB = await getUserByName(username);
+  console.log(userFromDB);
 
-  if (!useFromDB) {
+  if (!userFromDB) {
     response.status(401).send({ message: "Invalid credentials" });
   } else {
-    const storedDBPassword = useFromDB.password;
+    const storedDBPassword = userFromDB.password;
     const isPasswordCheck = await bcrypt.compare(password, storedDBPassword);
     console.log(isPasswordCheck);
 
     if (isPasswordCheck) {
-      const token = jwt.sign({ id: useFromDB._id }, process.env.SECRET_KEY);
-      response.send({ message: "Sucessfull login", token: token });
+      const token = jwt.sign({ id: userFromDB._id }, process.env.SECRET_KEY);
+      response.send({
+        message: "Sucessfull login",
+        token: token,
+        roleId: userFromDB.roleId,
+      });
     } else {
       response.status(401).send({ message: "Invalid credentials" });
     }

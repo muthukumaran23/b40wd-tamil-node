@@ -1,10 +1,12 @@
 // const express = require("express"); // "type": "commonjs" // 3rd party package impoart
-import express from "express"; // "type": "module"
+import express, { response } from "express"; // "type": "module"
 import { MongoClient } from "mongodb";
 import * as dotenv from "dotenv";
 import moviesRouter from "./routes/movies.route.js";
 import userRouter from "./routes/user.route.js";
 import cors from "cors";
+import { auth } from "./middleware/auth.js";
+import { ObjectId } from "mongodb";
 
 dotenv.config();
 
@@ -32,6 +34,62 @@ app.get("/", function (request, response) {
 
 app.use("/movies", moviesRouter);
 app.use("/user", userRouter);
+
+//  http://localhost:4000/mobiles
+
+app.get("/mobiles", auth, async (request, response) => {
+  //get data from atlas
+  // db.mobiles.find({});
+
+  // Cursor
+  const mobiles = await client
+    .db("person")
+    .collection("mobiles")
+    .find({})
+    .toArray();
+
+  response.send(mobiles);
+});
+
+// /mobiles - POST
+
+app.post("/mobiles", auth, async (request, response) => {
+  const data = request.body;
+  // db.mobiles.insertMany(data);
+
+  const result = await client
+    .db("person")
+    .collection("mobiles")
+    .insertMany(data);
+
+  response.send(result);
+});
+
+const ROLE_ID = {
+  ADMIN: "0",
+  NORMAL_USER: "1",
+};
+
+app.delete("/mobiles/:id", auth, async function (request, response) {
+  const { id } = request.params;
+  // db.mobiles.deletOne({ _id: '100' })
+  const { roleId } = request;
+  // console.log(request.roleId);
+
+  if (roleId === ROLE_ID.ADMIN) {
+    const result = await client
+      .db("person")
+      .collection("mobiles")
+      .deleteOne({ _id: new ObjectId(id) });
+
+    console.log(result);
+    result.deletedCount > 0
+      ? response.send({ message: "mobile deleted successfully" })
+      : response.status(404).send({ message: "mobile not found" });
+  } else {
+    response.status(401).send({ message: "Unauthorized" });
+  }
+});
 
 app.listen(PORT, () => console.log(`The server started in: ${PORT} ✨✨`)); // App start
 
